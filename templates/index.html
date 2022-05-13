@@ -1,0 +1,201 @@
+<!-- link bulma -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css.map"
+/>
+<link
+  rel="stylesheet"
+  href="https://raw.githubusercontent.com/CreativeBulma/bulma-divider/master/dist/bulma-divider.css"
+/>
+<!--get jquery-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!--make a text box at the middle of the screen-->
+<style>
+  .center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+{% if lenwall < 2 %}
+<header class="has-background-primary">
+  <nav class="level-right is-centered" style="margin-right: 10px">
+    <button class="button is-rounded is-outlined js-modal-trigger" style="margin: 10px" data-target="connectwallet">
+      Connect Wallet
+    </button>
+    <div id="connectwallet" class="modal">
+        <div class="modal-background"></div>
+          <div class="box">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+              <header class="modal-card-head">
+                <p class="modal-card-title">Connect Wallet</p>
+              </header>
+              <div class="modal-card-body">
+                <form action="/connect" method="POST">
+                    <div class="field">
+                    <div class="control">
+                        <input class="input" type="text" placeholder="Wallet Address | ex. mqQWzdJZ88YeLqVf3KkpvZfZAqWWYTNPVg" id="walletaddr" name="walletaddr">
+                    </div>
+                    </div>
+                </div>
+                    <footer class="modal-card-foot">
+                        <button type="submit" class="button is-success">Set Wallet</button>
+                    </footer>
+                </form>
+            </div>
+        </div>
+    </div>
+  </nav>
+</header>
+{% else %}
+<header class="has-background-primary">
+    <nav class="level-right is-centered" style="margin-right: 10px">
+      <button class="button is-rounded is-outlined js-modal-trigger" style="margin: 10px" data-target="">
+        Wallet Connected!
+      </button>
+      </div>
+    </nav>
+  </header>
+{% endif %}
+{% if request.args.get('type') %}
+<br />
+<div class="is-centered container">
+  {% if request.args.get('type') == 'success' %}
+  <div class="notification is-success">
+    <button class="delete"></button>
+    {{ request.args.get("message") | safe }}
+  </div>
+  {% endif %} {% if request.args.get('type') == 'error' %}
+  <div class="cont-notif notification is-centered is-danger">
+    <button class="delete"></button>
+    {{ request.args.get("message") | safe }}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+<!--make a text box at the middle of the screen-->
+<div class="center">
+  <div class="box">
+    <h1>Trade</h1>
+    <form action="/trade" method="POST">
+      <!--make 2 text areas with placeholder 0.0 with a width of 30px wide-->
+      <div class="field">
+        <div class="control">
+          <!--Make a text area with a rounded dropdown menu on the side of it-->
+          <nav class="level">
+            <input
+              class="input"
+              type="text"
+              placeholder="0.0"
+              name="amount"
+              required
+            />‎ ‎
+            <div class="select is-rounded">
+              <select name="asset">
+                <option value="AVN">Avian</option>
+              </select>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div class="field">
+        <div class="divider" data-content="OR"></div>
+        <div class="control">
+          <!--Make a text area with a rounded dropdown menu on the side of it-->
+          <nav class="level">
+            <input
+              class="input"
+              type="text"
+              placeholder="0.0"
+              name="amount1"
+              required
+            />‎ ‎
+            <div class="select is-rounded">
+              <select name="asset1">
+                {% for asset in assets %}
+                <option value="{{ asset }}">{{ asset }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <div class="field">
+        <button type="submit" class="button is-fullwidth">Trade</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    (document.querySelectorAll(".notification .delete") || []).forEach(
+      ($delete) => {
+        const $notification = $delete.parentNode;
+
+        $delete.addEventListener("click", () => {
+          $notification.parentNode.removeChild($notification);
+        });
+      }
+    );
+  });
+</script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Functions to open and close a modal
+    function openModal($el) {
+      $el.classList.add("is-active");
+    }
+
+    function closeModal($el) {
+      $el.classList.remove("is-active");
+    }
+
+    function closeAllModals() {
+      (document.querySelectorAll(".modal") || []).forEach(($modal) => {
+        closeModal($modal);
+      });
+    }
+
+    // Add a click event on buttons to open a specific modal
+    (document.querySelectorAll(".js-modal-trigger") || []).forEach(
+      ($trigger) => {
+        const modal = $trigger.dataset.target;
+        const $target = document.getElementById(modal);
+        console.log($target);
+
+        $trigger.addEventListener("click", () => {
+          openModal($target);
+        });
+      }
+    );
+
+    // Add a click event on various child elements to close the parent modal
+    (
+      document.querySelectorAll(
+        ".modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button"
+      ) || []
+    ).forEach(($close) => {
+      const $target = $close.closest(".modal");
+
+      $close.addEventListener("click", () => {
+        closeModal($target);
+      });
+    });
+
+    // Add a keyboard event to close all modals
+    document.addEventListener("keydown", (event) => {
+      const e = event || window.event;
+
+      if (e.keyCode === 27) {
+        // Escape key
+        closeAllModals();
+      }
+    });
+  });
+</script>
