@@ -63,7 +63,7 @@ def index():
 #     except:
 #         return {"error":"command not found"}
 #     return {"success": True, "data":result}
-@app.route('/send', methods=["GET", "POST"])
+#@app.route('/send', methods=["GET", "POST"])
 def send():
     if request.method == "POST":
         addr = request.form["addr"]
@@ -92,7 +92,17 @@ def trade():
     tradep2 = request.form["asset1"]
     pair = tradep1 + "-" + tradep2
     tradedb.insert_one({"uid":uid(), "pair":pair, "type":"trade", "amount":tradep1_amt})
-            
+@app.route('/price/<pair>')
+def price(pair):
+    assets = json.load(open('trade.json', "r"))
+    result = assets["assets"]
+    all_assets = ''
+    i = 0
+    for i in range(len(result)): 
+        if pair == result[i][0]:
+            result[i][0] + all_assets
+        i+=1
+    return all_assets
 if __name__ == "__main__":
     app.run(debug=True)
 

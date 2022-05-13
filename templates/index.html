@@ -109,27 +109,38 @@
         <div class="control">
           <!--Make a text area with a rounded dropdown menu on the side of it-->
           <nav class="level">
-            <input
-              class="input"
-              type="text"
-              placeholder="0.0"
-              name="amount1"
-              required
-            />‎ ‎
+            <div class="box">
+              <p class="is-3" id="amt2"><strong id="amt"></strong></p>
+            </div>
             <div class="select is-rounded">
-              <select name="asset1">
+              <select name="asset1" class="assets">
                 {% for asset in assets %}
-                <option value="{{ asset }}">{{ asset }}</option>
+                <option value="{{ asset[0] }}" >{{ asset[0] }}</option>
                 {% endfor %}
               </select>
             </div>
           </nav>
+          <script>
+            $(document).ready(function(){
+                $("select.assets").change(function(){
+                    var selectedValue = $(this).children("option:selected").val();
+                    document.getElementById("amt").innerText = ''
+                });
+            });
+          </script>
         </div>
       </div>
+      {% if lenwall > 2 %}
       <div class="field">
         <button type="submit" class="button is-fullwidth">Trade</button>
       </div>
-    </form>
+      </form>
+      {% else %}
+      </form>
+      <div class="field">
+        <button class="button is-fullwidth js-modal-trigger" data-target="connectwallet">Connect Wallet</button>
+      </div>
+      {% endif %}
   </div>
 </div>
 <script>
