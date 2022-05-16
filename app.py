@@ -39,7 +39,12 @@ def uid():
 # dex start
 @app.route('/')
 def index():
-    #result = rpc_connection.batch_([["listassets"]])
+    while True:
+        try:
+            blockcount = rpc_connection.batch_([["blockcount"]])[0]
+            break
+        except:
+            pass
     assets = json.load(open('trade.json', "r"))
     result = assets["assets"]
     get_op = []
@@ -56,7 +61,7 @@ def index():
     #     else:
     #         get_op.append(result[0][i])
     #     i+=1
-    return render_template("index.html", assets=result, lenassets=len(result), lenwall=len_bg)
+    return render_template("index.html", assets=result, lenassets=len(result), lenwall=len_bg, blockcount=blockcount)
 # Command Section (TESTING, DELETE ONCE SEND WORKS!) - Deleted
 # @app.route('/command/<command>')
 # def cmd(command):

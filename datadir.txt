@@ -1,0 +1,1 @@
+./aviand -testnet -datadir=/workspace/aviandex/.avian
