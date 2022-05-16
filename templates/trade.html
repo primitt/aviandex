@@ -1,14 +1,91 @@
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"
-/>
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css.map"
-/>
-<link
-  rel="stylesheet"
-  href="https://raw.githubusercontent.com/CreativeBulma/bulma-divider/master/dist/bulma-divider.css"
-/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css.map" />
+<link rel="stylesheet"
+  href="https://raw.githubusercontent.com/CreativeBulma/bulma-divider/master/dist/bulma-divider.css" />
 <!--get jquery-->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<!-- make a box in the middle of the screen with a padding of 10 on each side -->
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<style>
+  .center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings:
+    'FILL' 1,
+    'wght' 700,
+    'GRAD' 200,
+    'opsz' 48
+  }
+  </style>
+
+<body>
+  <div class="center">
+    <div class="box" id="pending">
+      <div class="columns">
+        <div class="column"></div>
+        <div class="column">
+          <span class="material-symbols-outlined" style="font-size:100px">
+            pending
+          </span><br>
+        </div>
+        <div class="column"></div>
+      </div>
+      <strong>Send {{amount}} {{pair[0]}} to {{find["txidaddress"][0]}}</strong><br>
+      We are waiting for your transaction!<br>
+      <strong>TXID: </strong> <span id="txid">{{find["txid"]}}</span>
+      <p class="is-1" style="font-size: 13px;">You can close this tab! We will search for your transaction every 15 min!</p>
+    </div>
+    <div class="box is-hidden" id="completed">
+      <div class="columns">
+        <div class="column"></div>
+        <div class="column">
+          <span class="material-symbols-outlined" style="font-size:100px; color:green">
+            check_circle
+          </span><br>
+        </div>
+        <div class="column"></div>
+      </div>
+      <strong>We have received {{amount}} {{pair[0]}}</strong><br>
+        We have sent {{amount}} {{pair[1]}}<br>
+      <strong>TXID: </strong> <span id="txid1">{{find["txid"]}}</span>
+      <p class="is-1 has-text-centered" style="font-size: 13px;">This trade is complete</p>
+    </div>
+  </div>
+</body>
+<script>
+  // the page ping /get/status/{{find["uid"][0]}} every 15 seconds
+  var pen = "{{find['status']}}";
+  if (pen == "pending"){
+    setInterval(function() {
+      $.ajax({
+        url: "/get/status/{{find["uid"]}}",
+        success: function(result) {
+          var txid_pending = document.getElementById("txid");
+          var txid_complete = document.getElementById("txid1");
+          var pending = document.getElementById("pending");
+          var completed = document.getElementById("completed");
+          if (result["status"] == "complete") {
+            pending.classList.add("is-hidden");
+            completed.classList.remove("is-hidden");
+            txid_complete.innerHTML = result["txid"];
+            console.log("Complete!")
+          }
+        }
+      });
+    }, 15000);
+  }
+  else if (pen == "complete"){
+    var pending = document.getElementById("pending");
+    var completed = document.getElementById("completed");
+    pending.classList.add("is-hidden");
+    completed.classList.remove("is-hidden");
+    
+  }
+</script>

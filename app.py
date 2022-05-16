@@ -1,7 +1,9 @@
 # imports
-from flask import Flask, url_for, render_template, redirect, request, json, make_response # more imports can be added 
+from flask import Flask, url_for, render_template, redirect, request, make_response # more imports can be added 
 import pymongo
 import random
+import requests
+import time
 # from bitcoin import * 
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
 import json
@@ -91,7 +93,20 @@ def trade():
     tradep1_amt = request.form["amount"]
     tradep2 = request.form["asset1"]
     pair = tradep1 + "-" + tradep2
-    tradedb.insert_one({"uid":uid(), "pair":pair, "type":"trade", "amount":tradep1_amt})
+    uids = uid()
+    new_addr = rpc_connection.batch_([["getnewaddress", uids]])
+    tradedb.insert_one({"uid":uids, "pair":pair, "type":"trade", "amount":tradep1_amt, "txid":"-", "txidaddress":new_addr, "address":request.cookies.get('wallet'), "status":"pending", "time":time.time()})
+    return redirect(url_for("payment", uid=uids))
+@app.route('/trade/<uid>', methods=["GET", "POST"])
+def payment(uid):
+    finds = tradedb.find({"uid":uid})
+    finders = []
+    for find in finds:
+        finders.append(find)
+    if finders == []:
+        return redirect(url_for("index", message="Unable to find trade", type="error"))
+    else:
+        return render_template("trade.html", msgtype="incompletetx", uid=uid, pair=(finders[0]["pair"]).split("-"), amount=finders[0]["amount"], find=finders[0])
 @app.route('/price/<pair>')
 def price(pair):
     assets = json.load(open('trade.json', "r"))
@@ -100,9 +115,43 @@ def price(pair):
     i = 0
     for i in range(len(result)): 
         if pair == result[i][0]:
-            result[i][0] + all_assets
+            return result[i][2]
         i+=1
-    return all_assets
+    return "Not Found"
+@app.route('/get/status/<uid>', methods=["GET"])
+def gettx(uid):
+    # file = open("test.txt", "r")
+    # contents = file.read()
+    
+    get_uid = tradedb.find({"uid":uid})
+    get_ui = []
+    for uids in get_uid:
+        get_ui.append(uids)
+    if get_ui == []:
+        return {"error":"Unable to find trade"}
+    else:
+        result = requests.get("https://testnet.avn.network/ext/getaddress/" + get_ui[0]["txidaddress"][0]).json()
+        try:
+            txid = result["error"]
+            return {"status":"pending"}
+        except:
+                txid_arr = result["last_txs"]
+                txid = []
+                for txids in txid_arr:
+                    if txids["type"] == "vout":
+                        txid.append(txids["addresses"])
+                    else:
+                        pass
+                if txid == []:
+                    return {"status":"pending"}
+                else:
+                    if get_ui[0]["status"] == "pending":
+                                send_coin = rpc_connection.batch_([["sendfrom", "", get_ui[0]["address"], get_ui[0]["amount"]]])
+                                print(send_coin)
+                                tradedb.update_one({"uid":uid}, {"$set":{"txid":txid[0], "status":"complete"}})
+                        #return {"status":"complete", "txid":txid[0], "balance":result["received"]}
+            # except: 
+            #     return {"error":"Unable to find TX"}
 if __name__ == "__main__":
     app.run(debug=True)
 
