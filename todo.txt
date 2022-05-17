@@ -1,0 +1,7 @@
+- Complete the detecting of user sending funds to account - DONE
+
+- Complete the sending of a users funds (traded)
+- Add a liquidity meter
+- Add price formulas
+- BUG TESTING
+ß

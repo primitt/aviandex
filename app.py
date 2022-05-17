@@ -20,6 +20,8 @@ def get_database():
     return client['aviandex']
 dbname = get_database()
 tradedb = dbname["trades"]
+def price(pair):
+    pass
 def uid():
     # make a array with all the lowercase letters of the alphabet
     uid_string = ""
@@ -41,12 +43,18 @@ def uid():
 def index():
     while True:
         try:
-            blockcount = rpc_connection.batch_([["blockcount"]])[0]
+            blockcount = rpc_connection.batch_([["blockcount"]])
             break
         except:
             pass
-    assets = json.load(open('trade.json', "r"))
-    result = assets["assets"]
+    while True:
+        try:
+            assets = rpc_connection.batch_([["listmyassets"]])[0]
+            break
+        except:
+            pass
+    #assets = json.load(open('trade.json', "r"))
+    #result = assets["assets"]
     get_op = []
     i = 0
     try:
@@ -61,7 +69,7 @@ def index():
     #     else:
     #         get_op.append(result[0][i])
     #     i+=1
-    return render_template("index.html", assets=result, lenassets=len(result), lenwall=len_bg, blockcount=blockcount)
+    return render_template("index.html", assets=assets, lenassets=len(result), lenwall=len_bg, blockcount=blockcount)
 # Command Section (TESTING, DELETE ONCE SEND WORKS!) - Deleted
 # @app.route('/command/<command>')
 # def cmd(command):
@@ -99,8 +107,19 @@ def trade():
     tradep2 = request.form["asset1"]
     pair = tradep1 + "-" + tradep2
     uids = uid()
-    new_addr = rpc_connection.batch_([["getnewaddress", uids]])
-    tradedb.insert_one({"uid":uids, "pair":pair, "type":"trade", "amount":tradep1_amt, "txid":"-", "txidaddress":new_addr, "address":request.cookies.get('wallet'), "status":"pending", "time":time.time()})
+    while True:
+        try:
+            new_addr = rpc_connection.batch_([["getnewaddress", uids]])
+            break
+        except:
+            pass
+    while True:
+        try:
+            assets = rpc_connection.batch_([["listmyassets", tradep2]])
+            break
+        except:
+            pass
+    tradedb.insert_one({"uid":uids, "pair":pair, "type":"trade", "amountp1":tradep1_amt, "amountp2":tradep1_amt*price, "txid":"-", "txidaddress":new_addr, "address":request.cookies.get('wallet'), "status":"pending", "time":time.time()})
     return redirect(url_for("payment", uid=uids))
 @app.route('/trade/<uid>', methods=["GET", "POST"])
 def payment(uid):
@@ -158,5 +177,5 @@ def gettx(uid):
             # except: 
             #     return {"error":"Unable to find TX"}
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=8080)
 
