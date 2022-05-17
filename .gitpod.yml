@@ -3,6 +3,11 @@
 # and commit this file to your remote git repository to share the goodness with others.
 
 tasks:
-  - command: python main.py
+  - init: pip install -r requirements.txt
+    command: python app.py
+  - name: Start Aviand
+    init: cd avian/depends/folder/bin
+    command: ./aviand -testnet -datadir=/workspace/aviandex/.avian
+
 
 
