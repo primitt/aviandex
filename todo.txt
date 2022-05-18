@@ -2,6 +2,8 @@
 
 - Complete the sending of a users funds (traded)
 - Add a liquidity meter
+    - Use mongodb to pull values
+    - Ping price API /get/price/<thing>
 - Add price formulas
+    - Extra script
 - BUG TESTING
-ß
