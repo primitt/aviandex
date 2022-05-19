@@ -4,7 +4,7 @@ import json
 
 # initializers
 
-rpc_connection = AuthServiceProxy("http://%s:%s@127.0.0.1:8000"%("username", "password"))
+rpc_connection = AuthServiceProxy("http://%s:%s@127.0.0.1:8000"%("username", "password"), timeout=200)
 file1 = open("balance.txt", "r")
 while True:
         with open('balance.txt', "r") as f:

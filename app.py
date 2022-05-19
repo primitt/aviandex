@@ -11,7 +11,7 @@ import json
 # initializers
 app = Flask(__name__)
 rpc_connection = AuthServiceProxy(
-    "http://%s:%s@127.0.0.1:8000" % ("username", "password"))
+    "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=300)
 
 
 def get_database():
