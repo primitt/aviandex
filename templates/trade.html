@@ -43,6 +43,28 @@
       <p class="is-1" style="font-size: 13px;">You can close this tab! We will search for your transaction every 15 min!</p>
     </div>
     <div class="box is-hidden" id="completed">
+      <nav class="level-left">
+        <!--Function to copy a text to the clipboard -->
+        <p class="level-item">
+          <a class="button is-primary" id="copy" data-clipboard-target="#txid">
+            <span class="icon">
+              <i class="fas fa-share"></i>
+            </span>
+          </a>
+      </nav>
+      <script>
+        var clipboard = new ClipboardJS('#copy');
+        clipboard.on('success', function(e) {
+          console.info('Action:', e.action);
+          console.info('Text:', e.text);
+          console.info('Trigger:', e.trigger);
+          e.clearSelection();
+        });
+        clipboard.on('error', function(e) {
+          console.error('Action:', e.action);
+          console.error('Trigger:', e.trigger);
+        });
+      </script>
       <div class="columns">
         <div class="column"></div>
         <div class="column">
@@ -53,7 +75,7 @@
         <div class="column"></div>
       </div>
       <strong>We have received {{amount}} {{pair[0]}}</strong><br>
-        We have sent {{amount}} {{pair[1]}}<br>
+        We have sent {{amountp2}} {{pair[1]}}<br>
       <strong>TXID: </strong> <span id="txid1">{{find["txid"]}}</span>
       <p class="is-1 has-text-centered" style="font-size: 13px;">This trade is complete</p>
     </div>

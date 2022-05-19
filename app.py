@@ -53,12 +53,11 @@ def uid():
 
 @app.route('/')
 def index():
-    while True:
-        try:
-            blockcount = rpc_connection.batch_([["getblockcount"]])
-            break
-        except:
-            pass
+    try:
+        blockcount = rpc_connection.batch_([["getblockcount"]])
+        
+    except:
+        blockcount = "null"
             #assets = rpc_connection.batch_([["listmyassets"]])[0]
             # assets = {
             #     "DEX": 5000000.0000,
@@ -67,7 +66,7 @@ def index():
     asset = assetdb.find()
     assets = []
     for name in asset:
-        assets.append(name["asset_name"])
+        assets.append(name["name"])
     #assets = json.load(open('trade.json', "r"))
     #result = assets["assets"]
     get_op = []
@@ -130,20 +129,19 @@ def trade():
     tradep1_amt = request.form["amount"]
     tradep2 = request.form["asset1"]
     pair = tradep1 + "-" + tradep2
+    finds = assetdb.find({"pair":pair})
+    time.sleep(1)
+    find = []
+    for foinds in finds:
+        find.append(foinds)
     uids = uid()
-    while True:
-        try:
-            new_addr = rpc_connection.batch_([["getnewaddress", uids]])
-            break
-        except:
-            pass
-    while True:
-        try:
-            assets = rpc_connection.batch_([["listmyassets", tradep2]])
-            break
-        except:
-            pass
-    tradedb.insert_one({"uid": uids, "pair": pair, "type": "trade", "amountp1": tradep1_amt, "amountp2": tradep1_amt*price,
+    if find == []:
+        return redirect("/", message="Not a tradable pair!", type="error")
+    new_addr = rpc_connection.batch_([["getnewaddress", uids]])
+    assets = find[0]["liquidity"]
+    balance = rpc_connection.batch_([["getbalance"]])
+    price = float(balance[0])/float(assets)
+    tradedb.insert_one({"uid": uids, "pair": pair, "type": "trade", "amountp1": tradep1_amt, "amountp2": float(tradep1_amt)*price,
                        "txid": "-", "txidaddress": new_addr, "address": request.cookies.get('wallet'), "status": "pending", "time": time.time()})
     return redirect(url_for("payment", uid=uids))
 
@@ -157,19 +155,28 @@ def payment(uid):
     if finders == []:
         return redirect(url_for("index", message="Unable to find trade", type="error"))
     else:
-        return render_template("trade.html", msgtype="incompletetx", uid=uid, pair=(finders[0]["pair"]).split("-"), amount=finders[0]["amount"], find=finders[0])
+        return render_template("trade.html", msgtype="incompletetx", uid=uid, pair=(finders[0]["pair"]).split("-"), amount=finders[0]["amountp1"], find=finders[0], amountp2=int(finders[0]["amountp2"]))
 
 
 @app.route('/price/<pair>')
 def price(pair):
-    assets = json.load(open('trade.json', "r"))
-    result = assets["assets"]
-    all_assets = ''
-    i = 0
-    for i in range(len(result)):
-        if pair == result[i][0]:
-            return result[i][2]
-        i += 1
+    find = assetdb.find({"name":pair})
+    finds = []
+    for finders in find:
+        finds.append(finders)
+    if finds == []:
+        return "Not Found"
+    else:
+        assets = finds[0]["liquidity"]
+        while True:
+            try:
+                file1 = open("balance.txt", "r")
+                balance = file1.read()
+                break
+            except:
+                pass
+        price = float(balance)/float(assets)
+        return str(price)
     return "Not Found"
 
 
@@ -202,17 +209,13 @@ def gettx(uid):
                 return {"status": "pending"}
             else:
                 if get_ui[0]["status"] == "pending":
-                    while True:
-                        try:
-                            send_coin = rpc_connection.batch_(
-                                [["sendfrom", "", get_ui[0]["address"], get_ui[0]["amount"]]])
-                            print(send_coin)
-                            break
-                        except:
-                            pass
+                    pairs = get_ui[0]["pair"].split("-")
+                    send_coin = rpc_connection.batch_(
+                        [["transfer", pairs[1], int(get_ui[0]["amountp2"]), get_ui[0]["address"]]]) #this is our problem 
+                    print(send_coin)
                     tradedb.update_one(
                         {"uid": uid}, {"$set": {"txid": txid[0], "status": "complete"}})
-                return {"status": "complete", "txid": txid[0]}
+                    return {"status": "complete", "txid": txid[0]}
 
                 # return {"status":"complete", "txid":txid[0], "balance":result["received"]}
             # except:

@@ -1,10 +1,15 @@
-from flask import Flask
+from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
+import time
+import json
 
-app = Flask(__name__)
+# initializers
 
-@app.route('/')
-def index():
-    return "Hi!"
-
-if __name__ == "__main__":
-    app.run()
+rpc_connection = AuthServiceProxy("http://%s:%s@127.0.0.1:8000"%("username", "password"))
+file1 = open("balance.txt", "r")
+while True:
+        with open('balance.txt', "r") as f:
+            intof_currentid = rpc_connection.batch_([["getbalance"]])
+        with open('balance.txt', "w") as f:
+            f.write(str(intof_currentid[0]))
+        time.sleep(60)
+    

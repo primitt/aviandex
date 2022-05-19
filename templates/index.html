@@ -25,6 +25,9 @@
 {% if lenwall < 2 %}
 <header class="has-background-primary">
   <nav class="level-right is-centered" style="margin-right: 10px">
+    <p class="has-text-gray">
+      On Block: {{blockcount[0]}}
+    </p>
     <button class="button is-rounded is-outlined js-modal-trigger" style="margin: 10px" data-target="connectwallet">
       Connect Wallet
     </button>
@@ -115,6 +118,7 @@
             </div>
             <div class="select is-rounded">
               <select name="asset1" class="assets">
+                <option value="">Select an Asset</option>
                 {% for asset in assets %}
                 <option value="{{ asset }}" >{{ asset }}</option>
                 {% endfor %}
@@ -133,15 +137,28 @@
                             //document.getElementById("amt").innerText = httpreq.responseText;
                             //document.getElementById("amt2").innerText = '1 ' + selectedValue + ' = ' + httpreq.responseText + ' AVN';
                             // get the value of the amount input
+                    if (selectedValue == ""){
+                      console.log("Invalid Asset (Select an Asset is placeholder)")
+                    }
+                    else{
                       $("#aavn").on("input propertychange past", function () {
                         var amount = document.getElementById("aavn").value;
                         console.log(amount);
                         if (amount == '') {
                             amount = 0;
                         }
-                        document.getElementById("amt").innerText = (parseInt(httpreq.responseText)*parseInt(amount)).toString() + " " + selectedValue;
-                        document.getElementById("amt3").innerText =' ≈ ' + (parseInt(amount)).toString() + ' AVN';
+                        var price = (parseFloat(httpreq.responseText)*parseFloat(amount)).toString() + " " + selectedValue;
+                        console.log(price)
+                        if (httpreq.responseText == "Not Found"){
+                          document.getElementById("amt").innerText = "Please pick a pair!"
+                          document.getElementById("amt3").innerText = ""
+                        }
+                        else{
+                          document.getElementById("amt").innerText = price
+                          document.getElementById("amt3").innerText =' ≈ ' + (parseInt(amount)).toString() + ' AVN';
+                        }
                       });
+                    }
                     httpreq.send();
                 });
             });

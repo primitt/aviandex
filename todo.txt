@@ -1,9 +1,11 @@
+- CHANGE THE CODE TO RPC_CONNECTION.(COMMAND)
+
 - Complete the detecting of user sending funds to account - DONE
 
-- Complete the sending of a users funds (traded)
+- Complete the sending of a users funds (traded) - Almost?
 - Add a liquidity meter
-    - Use mongodb to pull values
-    - Ping price API /get/price/<thing>
-- Add price formulas
+    - Use mongodb to pull values - Done
+    - Ping price API /get/price/<thing> - Beta
+- Add price formulas - Beta
     - Extra script
 - BUG TESTING
