@@ -30,7 +30,21 @@ assetdb = dbname["assets"]
 
 def price(pair):
     pass
-
+def check_tx(addr, txid, amt):
+    tx = requests.get("https://testnet.avn.network/api/getrawtransaction?txid="+txid+"&decrypt=1").json()
+    print(txid)
+    vout = tx["vout"]
+    for i in vout:
+        if i["value"] > float(amt)-1 and i["value"] < float(amt)+1:
+            print(i["scriptPubKey"]["addresses"][0])
+            print(i["value"])
+            addr_result = i["scriptPubKey"]["addresses"][0]
+            return True
+        else:
+            "Wrong Amount"
+    return "Idk man"
+            
+    
 
 def uid():
     # make a array with all the lowercase letters of the alphabet
@@ -207,7 +221,10 @@ def gettx(uid):
             txid = []
             for txids in txid_arr:
                 if txids["type"] == "vout":
-                    txid.append(txids["addresses"])
+                    get_status = check_tx(addr=get_ui[0]["address"][0], txid=txids["addresses"], amt=get_ui[0]["amountp1"])
+                    if get_status == True:
+                        txid.append(txids["addresses"])
+                        break
                 else:
                     pass
             if txid == []:
@@ -221,6 +238,8 @@ def gettx(uid):
                     tradedb.update_one(
                         {"uid": uid}, {"$set": {"txid": txid[0], "status": "complete"}})
                     return {"status": "complete", "txid": txid[0]}
+                else:
+                    return {"status":"complete", "txid": get_ui[0]["txid"]}
 
                 # return {"status":"complete", "txid":txid[0], "balance":result["received"]}
             # except:
