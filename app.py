@@ -167,6 +167,11 @@ def trade():
 
 @app.route('/trade/<uid>', methods=["GET", "POST"])
 def payment(uid):
+    try:
+        blockcount = rpc_connection.batch_([["getblockcount"]])[0]
+        
+    except:
+        blockcount = "null"
     finds = tradedb.find({"uid": uid})
     finders = []
     for find in finds:
@@ -174,7 +179,7 @@ def payment(uid):
     if finders == []:
         return redirect(url_for("index", message="Unable to find trade", type="error"))
     else:
-        return render_template("trade.html", msgtype="incompletetx", uid=uid, pair=(finders[0]["pair"]).split("-"), amount=finders[0]["amountp1"], find=finders[0], amountp2=int(finders[0]["amountp2"]))
+        return render_template("trade.html", msgtype="incompletetx", uid=uid, pair=(finders[0]["pair"]).split("-"), amount=finders[0]["amountp1"], find=finders[0], amountp2=int(finders[0]["amountp2"]), blockcount=blockcount)
 
 
 @app.route('/price/<pair>')

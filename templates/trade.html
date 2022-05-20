@@ -24,7 +24,9 @@
     'opsz' 48
   }
   </style>
-
+<header>
+  On Block: {{blockcount}}
+</header>
 <body>
   <div class="center">
     <div class="box" id="pending">
@@ -43,28 +45,6 @@
       <p class="is-1" style="font-size: 13px;">You can close this tab! We will search for your transaction every 15 min!</p>
     </div>
     <div class="box is-hidden" id="completed">
-      <nav class="level-left">
-        <!--Function to copy a text to the clipboard -->
-        <p class="level-item">
-          <a class="button is-primary" id="copy" data-clipboard-target="#txid">
-            <span class="icon">
-              <i class="fas fa-share"></i>
-            </span>
-          </a>
-      </nav>
-      <script>
-        var clipboard = new ClipboardJS('#copy');
-        clipboard.on('success', function(e) {
-          console.info('Action:', e.action);
-          console.info('Text:', e.text);
-          console.info('Trigger:', e.trigger);
-          e.clearSelection();
-        });
-        clipboard.on('error', function(e) {
-          console.error('Action:', e.action);
-          console.error('Trigger:', e.trigger);
-        });
-      </script>
       <div class="columns">
         <div class="column"></div>
         <div class="column">
