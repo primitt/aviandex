@@ -137,10 +137,15 @@ def trade():
     uids = uid()
     if find == []:
         return redirect("/", message="Not a tradable pair!", type="error")
-    new_addr = rpc_connection.batch_([["getnewaddress", uids]])
+    while True:
+        try:
+            new_addr = rpc_connection.batch_([["getnewaddress", uids]])
+            break
+        except:
+            pass
     assets = find[0]["liquidity"]
-    balance = rpc_connection.batch_([["getbalance"]])
-    price = float(balance[0])/float(assets)
+    balance = open("balance.txt", "r").read()
+    price = float(balance)/float(assets)
     tradedb.insert_one({"uid": uids, "pair": pair, "type": "trade", "amountp1": tradep1_amt, "amountp2": float(tradep1_amt)*price,
                        "txid": "-", "txidaddress": new_addr, "address": request.cookies.get('wallet'), "status": "pending", "time": time.time()})
     return redirect(url_for("payment", uid=uids))
