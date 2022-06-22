@@ -1,0 +1,24 @@
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css.map"
+/>
+<link
+  rel="stylesheet"
+  href="https://raw.githubusercontent.com/CreativeBulma/bulma-divider/master/dist/bulma-divider.css"
+/>
+<!--get jquery-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<body>
+{% for items in assets %}
+<div class="box" style="margin:10px;">
+    <div class="is-2">
+    {{items[1]}} {{items[0]}} is worth 1 AVN
+    </div>
+</div>
+</body>
+{% endfor %}

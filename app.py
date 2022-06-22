@@ -206,7 +206,14 @@ def price(pair):
         price = float(balance)/float(assets)
         return str(price)
     return "Not Found"
-
+@app.route('/prices')
+def prices():
+    asset = assetdb.find()
+    assets = []
+    for name in asset:
+        price = requests.get("http://127.0.0.1:8070/price/" + name["name"]).text
+        assets.append([name["name"], price])
+    return render_template("prices.html", assets=assets)
 
 @app.route('/get/status/<uid>', methods=["GET"])
 def gettx(uid):
