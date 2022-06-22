@@ -67,12 +67,14 @@ def uid():
 
 @app.route('/')
 def index():
-    try:
-        blockcount = rpc_connection.batch_([["getblockcount"]])
-        
-    except:
-        blockcount = "null"
-            #assets = rpc_connection.batch_([["listmyassets"]])[0]
+    while True:
+        try:
+            blockcount = rpc_connection.batch_([["getblockcount"]])
+            break
+        except:
+            rpc_connection = AuthServiceProxy(
+            "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
+                #assets = rpc_connection.batch_([["listmyassets"]])[0]
             # assets = {
             #     "DEX": 5000000.0000,
             #     "DEX!": 1
@@ -112,17 +114,17 @@ def index():
 # @app.route('/send', methods=["GET", "POST"])
 
 
-def send():
-    if request.method == "POST":
-        addr = request.form["addr"]
-        if addr == "":
-            return redirect(url_for("index", message="Unable to send because no address", type="error"))
-        else:
-            try:
-                result = rpc_connection.batch_([["sendtoaddress", addr, 5]])
-            except Exception as e:
-                return redirect(url_for("index", message="Unable to send because it was an invalid address", type="error"))
-            return redirect(url_for("index", message="Sent 5 Testnet Avian to <b>" + addr + "</b>", type="success"))
+# def send():
+#     if request.method == "POST":
+#         addr = request.form["addr"]
+#         if addr == "":
+#             return redirect(url_for("index", message="Unable to send because no address", type="error"))
+#         else:
+#             try:
+#                 result = rpc_connection.batch_([["sendtoaddress", addr, 5]])
+#             except Exception as e:
+#                 return redirect(url_for("index", message="Unable to send because it was an invalid address", type="error"))
+#             return redirect(url_for("index", message="Sent 5 Testnet Avian to <b>" + addr + "</b>", type="success"))
 
 
 @app.route('/connect', methods=["POST"])
@@ -156,7 +158,9 @@ def trade():
             new_addr = rpc_connection.batch_([["getnewaddress", uids]])
             break
         except:
-            pass
+            rpc_connection = AuthServiceProxy(
+    "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
+            continue
     assets = find[0]["liquidity"]
     balance = open("balance.txt", "r").read()
     price = float(balance)/float(assets)
@@ -194,11 +198,11 @@ def price(pair):
         assets = finds[0]["liquidity"]
         while True:
             try:
-                file1 = open("balance.txt", "r")
-                balance = file1.read()
+                balance = rpc_connection.batch_([["getbalance"]])[0]
                 break
             except:
-                pass
+                rpc_connection = AuthServiceProxy(
+                "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
         price = float(balance)/float(assets)
         return str(price)
     return "Not Found"
@@ -237,8 +241,15 @@ def gettx(uid):
             else:
                 if get_ui[0]["status"] == "pending":
                     pairs = get_ui[0]["pair"].split("-")
-                    send_coin = rpc_connection.batch_(
-                        [["transfer", pairs[1], int(get_ui[0]["amountp2"]), get_ui[0]["address"]]]) #this is our problem 
+                    while True:
+                        try:
+                            send_coin = rpc_connection.batch_(
+                            [["transfer", pairs[1], int(get_ui[0]["amountp2"]), get_ui[0]["address"]]]) #this is our problem 
+                            break
+                        except:
+                            rpc_connection = AuthServiceProxy(
+    "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
+                            continue
                     print(send_coin)
                     tradedb.update_one(
                         {"uid": uid}, {"$set": {"txid": txid[0], "status": "complete"}})
@@ -250,4 +261,4 @@ def gettx(uid):
             # except:
             #     return {"error":"Unable to find TX"}
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=8080)
+    app.run(debug=True, host="0.0.0.0", port=8070)

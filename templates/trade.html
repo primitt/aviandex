@@ -48,8 +48,8 @@
       <div class="columns">
         <div class="column"></div>
         <div class="column">
-          <span class="material-symbols-outlined" style="font-size:100px; color:green">
-            check_circle
+          <span class="material-symbols-outlined" style="font-size:100px; color:green;">
+            check_circle 
           </span><br>
         </div>
         <div class="column"></div>
@@ -58,6 +58,18 @@
         We have sent {{amountp2}} {{pair[1]}}<br>
       <strong>TXID: </strong> <span id="txid1">{{find["txid"]}}</span>
       <p class="is-1 has-text-centered" style="font-size: 13px;">This trade is complete</p>
+    </div>
+    <div class="box is-hidden" id="invalid">
+      <div class="columns">
+        <div class="column"></div>
+        <div class="column">
+          <span class="material-symbols-outlined" style="font-size:100px; color:red;">
+            cancel
+          </span><br>
+        </div>
+        <div class="column"></div>
+      </div>
+      <p class="is-1 has-text-centered" style="font-size: 13px;">This trade is invalided because its been over 1 hour with no confirmed transaction.</p>
     </div>
   </div>
 </body>
@@ -89,5 +101,11 @@
     pending.classList.add("is-hidden");
     completed.classList.remove("is-hidden");
     
+  }
+  else if (pen == "invalid"){
+    var pending = document.getElementById("pending");
+    var invalid = document.getElementById("invalid");
+    pending.classList.add("is-hidden");
+    invalid.classList.remove("is-hidden");
   }
 </script>
