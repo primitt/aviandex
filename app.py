@@ -80,9 +80,13 @@ def index():
             #     "DEX!": 1
             # }
     asset = assetdb.find()
-    assets = []
+    buy_assets = []
+    sell_assets = []
     for name in asset:
-        assets.append(name["name"])
+        if name["type"] == "buy":
+            buy_assets.append(name["name"])
+        # if name["type"] == "sell":
+        #     sell_assets.append(name["name"])
     #assets = json.load(open('trade.json', "r"))
     #result = assets["assets"]
     get_op = []
@@ -102,29 +106,7 @@ def index():
     # key_list = [key for key in assets]
     # return "Printed"
     #return {"data":assets}
-    return render_template("index.html", lenassets=len(assets), lenwall=len_bg, blockcount=blockcount, assets=assets)
-# Command Section (TESTING, DELETE ONCE SEND WORKS!) - Deleted
-# @app.route('/command/<command>')
-# def cmd(command):
-#     try:
-#         result = rpc_connection.batch_([[command]])
-#     except:
-#         return {"error":"command not found"}
-#     return {"success": True, "data":result}
-# @app.route('/send', methods=["GET", "POST"])
-
-
-# def send():
-#     if request.method == "POST":
-#         addr = request.form["addr"]
-#         if addr == "":
-#             return redirect(url_for("index", message="Unable to send because no address", type="error"))
-#         else:
-#             try:
-#                 result = rpc_connection.batch_([["sendtoaddress", addr, 5]])
-#             except Exception as e:
-#                 return redirect(url_for("index", message="Unable to send because it was an invalid address", type="error"))
-#             return redirect(url_for("index", message="Sent 5 Testnet Avian to <b>" + addr + "</b>", type="success"))
+    return render_template("index.html", lenassets=len(buy_assets), lenwall=len_bg, blockcount=blockcount, assets=buy_assets)
 
 
 @app.route('/connect', methods=["POST"])
