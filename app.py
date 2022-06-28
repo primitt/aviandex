@@ -85,8 +85,8 @@ def index():
     for name in asset:
         if name["type"] == "buy":
             buy_assets.append(name["name"])
-        # if name["type"] == "sell":
-        #     sell_assets.append(name["name"])
+        if name["type"] == "sell":
+            sell_assets.append(name["name"])
     #assets = json.load(open('trade.json', "r"))
     #result = assets["assets"]
     get_op = []
@@ -106,7 +106,7 @@ def index():
     # key_list = [key for key in assets]
     # return "Printed"
     #return {"data":assets}
-    return render_template("index.html", lenassets=len(buy_assets), lenwall=len_bg, blockcount=blockcount, assets=buy_assets)
+    return render_template("index.html", lenassets=len(buy_assets), lenwall=len_bg, blockcount=blockcount, assets=buy_assets, sell_assets=sell_assets, lensell=len(sell_assets))
 
 
 @app.route('/connect', methods=["POST"])
@@ -185,7 +185,11 @@ def price(pair):
             except:
                 rpc_connection = AuthServiceProxy(
                 "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
-        price = float(balance)/float(assets)
+        if assets == "balance":
+            return balance
+            price = float(assets)/float(balance)
+        else:
+            price = float(balance)/float(assets)
         return str(price)
     return "Not Found"
 @app.route('/prices')

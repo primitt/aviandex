@@ -104,8 +104,11 @@
               required
             />‎ ‎
             <div class="select is-rounded">
-              <select name="asset">
-                <option value="AVN">Avian</option>
+              <select name="asset" class="assets">
+                <option value="">Select an Asset</option>
+                {% for asset in sell_assets %}
+                <option value="{{ asset }}" >{{ asset }}</option>
+                {% endfor %}
               </select>
             </div>
           </nav>
