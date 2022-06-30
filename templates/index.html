@@ -104,7 +104,7 @@
               required
             />‎ ‎
             <div class="select is-rounded">
-              <select name="asset" class="assets">
+              <select name="asset" class="assets2">
                 <option value="">Select an Asset</option>
                 {% for asset in sell_assets %}
                 <option value="{{ asset }}" >{{ asset }}</option>
@@ -135,6 +135,8 @@
             $(document).ready(function(){
                 $("select.assets").change(function(){
                     var selectedValue = $(this).children("option:selected").val();
+                    var secondSelectedValue = $("select.assets2").children("option:selected").val();
+                    console.log(secondSelectedValue)
                     document.getElementById("amt").innerText = ''
                     httpreq = new XMLHttpRequest();
                     httpreq.open('GET', '/price/' + selectedValue, true);
@@ -153,7 +155,12 @@
                         if (amount == '') {
                             amount = 0;
                         }
-                        var price = (parseFloat(httpreq.responseText)*parseFloat(amount)).toString() + " " + selectedValue;
+                        if (selectedValue == "AVN"){
+                          var price = (parseFloat(httpreq.responseText)*parseFloat(amount)).toString() + " " + secondSelectedValue;
+                        }
+                        else{
+                          var price = (parseFloat(httpreq.responseText)*parseFloat(amount)).toString() + " " + selectedValue;
+                        }
                         console.log(price)
                         if (httpreq.responseText == "Not Found"){
                           document.getElementById("amt").innerText = "Please pick a pair!"

@@ -1,0 +1,19 @@
+Project DEX
+- Fix Selling (DEX-AVN) Trade Page
+    - Price has to be in DEX (store in DB as DEX)
+    - Make it say the pair that is currently being traded
+- Make a new checker code for DEX-AVN
+- Make a new sending code for DEX-AVN
+- Make a liquidity a thing
+    - Users can add new pairs
+    - Users can add liquidity for an LP token (hard to issue, will need flightplan for this)
+
+Project Flightplan
+- Make a flightplan "CDN" which hosts the global flightplans that people will have to submit in order to use "Global Flightplans"
+    - Implement this into the extention
+    - Add WEB3 into the extention
+
+Project NFT
+- NFT marketplace
+    - Allow users to list NFT's (and create them)
+    - Allow users to see others NFT's

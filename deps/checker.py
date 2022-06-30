@@ -67,12 +67,25 @@ while True:
                             except:
                                 rpc_connection = AuthServiceProxy(
         "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
-                                continue
                         print(send_coin)
                         tradedb.update_one(
                             {"uid": items["uid"]}, {"$set": {"txid": txid[0], "status": "complete"}})
                         print("Complete " + items["uid"])
                     else:
                         print("Complete " + items["uid"])
-    print("Done: " + str(time.time()))
+    print("Pending Check Done: " + str(time.time()))
+    # Check 2 - Liquidity check
+    assets = list(assetdb.find({"what":"asset"}))
+    for items in assets:
+        what = items["name"]
+        while True:
+            try:
+                get_liquidity = rpc_connection.batch_([["listmyassets"]])
+                break
+            except:
+                rpc_connection = AuthServiceProxy(
+        "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
+        liq = get_liquidity[0][what]
+        assetdb.update_one({"name": what}, {"$set": {"liquidity": str(int(liq))}})
+        print("Set " + what + " to " + str(liq))
     time.sleep(900)

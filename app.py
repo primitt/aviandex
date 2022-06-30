@@ -144,7 +144,13 @@ def trade():
     "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
             continue
     assets = find[0]["liquidity"]
-    balance = open("balance.txt", "r").read()
+    while True:
+            try:
+                balance = rpc_connection.batch_([["getbalance"]])[0]
+                break
+            except:
+                rpc_connection = AuthServiceProxy(
+                "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
     price = float(balance)/float(assets)
     tradedb.insert_one({"uid": uids, "pair": pair, "type": "trade", "amountp1": tradep1_amt, "amountp2": float(tradep1_amt)*price,
                        "txid": "-", "txidaddress": new_addr, "address": request.cookies.get('wallet'), "status": "pending", "time": time.time()})
@@ -185,9 +191,10 @@ def price(pair):
             except:
                 rpc_connection = AuthServiceProxy(
                 "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
+        pair2 = finds[0]["pair"].split("-")[1]
+        pair2_liquidity = list(assetdb.find({"name":pair2}))[0]["liquidity"]
         if assets == "balance":
-            return balance
-            price = float(assets)/float(balance)
+            price = float(balance)/float(pair2_liquidity)
         else:
             price = float(balance)/float(assets)
         return str(price)
