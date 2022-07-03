@@ -35,7 +35,7 @@ def check_tx(addr, txid, amt):
     print(txid)
     vout = tx["vout"]
     for i in vout:
-        if i["value"] > float(amt)-1 and i["value"] < float(amt)+1:
+        if i["value"] > float(amt)-0.1 and i["value"] < float(amt)+1:
             print(i["scriptPubKey"]["addresses"][0])
             print(i["value"])
             addr_result = i["scriptPubKey"]["addresses"][0]
@@ -126,6 +126,11 @@ def trade():
     tradep1 = request.form["asset"]
     tradep1_amt = request.form["amount"]
     tradep2 = request.form["asset1"]
+    price = requests.get("http://127.0.0.1:8070/price/"+tradep2).text
+    if tradep1 == "AVN":
+        tradep1_amt = request.form["amount"]
+    else:
+        tradep1_amt = int(request.form["amount"])*float(price)
     pair = tradep1 + "-" + tradep2
     finds = assetdb.find({"pair":pair})
     time.sleep(1)
@@ -134,7 +139,7 @@ def trade():
         find.append(foinds)
     uids = uid()
     if find == []:
-        return redirect("/", message="Not a tradable pair!", type="error")
+        return redirect(url_for("index", message="Not a tradable pair!", type="error"))
     while True:
         try:
             new_addr = rpc_connection.batch_([["getnewaddress", uids]])
@@ -151,8 +156,8 @@ def trade():
             except:
                 rpc_connection = AuthServiceProxy(
                 "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
-    price = float(balance)/float(assets)
-    tradedb.insert_one({"uid": uids, "pair": pair, "type": "trade", "amountp1": tradep1_amt, "amountp2": float(tradep1_amt)*price,
+    price = requests.get("http://127.0.0.1:8070/price/"+tradep2).text
+    tradedb.insert_one({"uid": uids, "pair": pair, "type": "trade", "amountp1": tradep1_amt, "amountp2": float(tradep1_amt),
                        "txid": "-", "txidaddress": new_addr, "address": request.cookies.get('wallet'), "status": "pending", "time": time.time()})
     return redirect(url_for("payment", uid=uids))
 
@@ -244,15 +249,14 @@ def gettx(uid):
                     while True:
                         try:
                             send_coin = rpc_connection.batch_(
-                            [["transfer", pairs[1], int(get_ui[0]["amountp2"]), get_ui[0]["address"]]]) #this is our problem 
+                            [["transfer", pairs[1], int(get_ui[0]["amountp2"]), get_ui[0]["address"]]]) #this is our problem - FIXED
                             break
                         except:
                             rpc_connection = AuthServiceProxy(
     "http://%s:%s@127.0.0.1:8000" % ("username", "password"), timeout=10000)
-                            continue
                     print(send_coin)
                     tradedb.update_one(
-                        {"uid": uid}, {"$set": {"txid": txid[0], "status": "complete"}})
+                        {"uid": uid}, {"$set": {"txid": txid[0], "status": "complete", "sendcoin":send_coin}})
                     return {"status": "complete", "txid": txid[0]}
                 else:
                     return {"status":"complete", "txid": get_ui[0]["txid"]}
